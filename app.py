@@ -275,6 +275,9 @@ with right:
     st.markdown('<div style="height:9px"></div><div class="feature"><strong>⌕ Answers with sources</strong><p>Ask questions and get answers grounded in retrieved passages and page references.</p></div>', unsafe_allow_html=True)
     st.markdown('<div style="height:9px"></div><div class="feature"><strong>▤ Study and action tools</strong><p>Make review notes, quiz questions, decisions, and action lists from the document.</p></div>', unsafe_allow_html=True)
 
+if not st.session_state.get("document_text"):
+    st.info("Upload a file and select **Read document**. The document chat opens as the first tab once extraction is complete.")
+
 if st.session_state.get("document_text"):
     text = st.session_state.document_text
     chunks = st.session_state.chunks
@@ -287,26 +290,12 @@ if st.session_state.get("document_text"):
         with col:
             st.markdown(f'<div class="metric-card"><div class="metric-value">{value}</div><div class="metric-label">{label}</div></div>', unsafe_allow_html=True)
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-    summary_tab, chat_tab, study_tab, text_tab = st.tabs(["✦ Summary", "⌕ Chat with document", "▤ Study tools", "Text & sources"])
-    with summary_tab:
-        a, b = st.columns([1, 1])
-        with a:
-            if st.button("Generate structured AI summary", use_container_width=True):
-                with st.spinner("Summarizing the document…"):
-                    try:
-                        st.session_state.ai_summary = document_prompt("summary", chunks)
-                    except Exception as error:
-                        st.error(str(error))
-        with b:
-            summary_to_download = st.session_state.get("ai_summary") or st.session_state.summary
-            st.download_button("Download summary", summary_to_download, file_name="pagewise-summary.md", mime="text/markdown", use_container_width=True)
-        if st.session_state.get("ai_summary"):
-            st.markdown(st.session_state.ai_summary)
-        else:
-            st.caption("Quick summary · generated locally from the extracted text")
-            st.markdown(st.session_state.summary)
+    chat_tab, summary_tab, study_tab, text_tab = st.tabs(["⌕ Chat with document", "✦ Summary", "▤ Study tools", "Text & sources"])
     with chat_tab:
-        st.caption("Pagewise finds the most relevant passages first, then asks the AI to answer from those passages. Responses include page or slide citations.")
+        st.markdown("#### Find specific information in your document")
+        st.caption("Ask about facts, dates, terms, or sections. Pagewise retrieves relevant passages first, then answers with page or slide citations.")
+        if not st.session_state.get("chat_history"):
+            st.markdown("Try asking: **What are the key findings?** · **Find dates and numbers** · **What does the document recommend?**")
         for message in st.session_state.get("chat_history", []):
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
@@ -328,6 +317,23 @@ if st.session_state.get("document_text"):
                         history.append({"role": "assistant", "content": answer, "sources": sources})
                     except Exception as error:
                         st.error(str(error))
+    with summary_tab:
+        a, b = st.columns([1, 1])
+        with a:
+            if st.button("Generate structured AI summary", use_container_width=True):
+                with st.spinner("Summarizing the document…"):
+                    try:
+                        st.session_state.ai_summary = document_prompt("summary", chunks)
+                    except Exception as error:
+                        st.error(str(error))
+        with b:
+            summary_to_download = st.session_state.get("ai_summary") or st.session_state.summary
+            st.download_button("Download summary", summary_to_download, file_name="pagewise-summary.md", mime="text/markdown", use_container_width=True)
+        if st.session_state.get("ai_summary"):
+            st.markdown(st.session_state.ai_summary)
+        else:
+            st.caption("Quick summary · generated locally from the extracted text")
+            st.markdown(st.session_state.summary)
     with study_tab:
         st.markdown("Get a study guide or pull decisions and action items from the uploaded file.")
         s1, s2 = st.columns(2)
