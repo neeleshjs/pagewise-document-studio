@@ -7,6 +7,7 @@ from io import BytesIO
 from xml.etree import ElementTree
 
 import fitz
+import html
 import pytesseract
 import requests
 import streamlit as st
@@ -34,6 +35,25 @@ st.markdown("""
 .hero{padding:48px 0 35px;text-align:center}.pill{display:inline-block;color:var(--green);font-size:10px;letter-spacing:.15em;font-weight:700;background:var(--sage);padding:8px 12px;border-radius:30px}.hero h1{font:800 clamp(36px,5vw,58px) Manrope,sans-serif;letter-spacing:-.055em;line-height:1.08;margin:17px 0 12px;color:var(--ink)}.hero h1 span{color:#66886d}.hero p{color:var(--muted);font-size:15px;max-width:650px;margin:0 auto;line-height:1.7}
 .upload-card,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 8px 28px #21342808}.upload-card{max-width:850px;margin:0 auto}.upload-caption{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 14px}.format-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0 4px}.format{border:1px solid var(--line);padding:5px 9px;border-radius:7px;color:#59665c;font-size:11px;font-weight:600;background:#fbfcfa}
 .stFileUploader>section{border:1.5px dashed #b9c9ba;border-radius:12px;background:#fbfcfa}.stFileUploader>section:hover{border-color:var(--green)}.stButton>button{background:var(--green);color:white;border:0;border-radius:9px;min-height:42px;font-weight:600}.stButton>button:hover{background:#244936;color:white}.stDownloadButton>button{border:1px solid #d8e0d8;color:var(--green);background:#fff;border-radius:8px}.stTabs [data-baseweb=tab-list]{gap:18px;border-bottom:1px solid var(--line)}.stTabs [data-baseweb=tab]{font-size:13px}.stChatInput textarea{border-radius:10px}.stChatInput,[data-testid="stChatInput"],[data-testid="stChatInput"]>div,[data-testid="stChatInput"] textarea{background:#fff!important;color:#18271f!important;color-scheme:light!important;border-color:#dce5dc!important}.stChatInput textarea::placeholder,[data-testid="stChatInput"] textarea::placeholder{color:#7b867e!important;opacity:1}.stChatMessage,[data-testid="stChatMessage"]{background:#fff!important;color:#18271f!important;color-scheme:light!important;border:1px solid #e2e7e1;border-radius:12px;padding:12px 14px;margin-bottom:10px}.stChatMessage p,[data-testid="stChatMessage"] p,.stChatMessage li,[data-testid="stChatMessage"] li{color:#18271f!important}.metric-card{padding:17px 18px;background:#fff;border:1px solid var(--line);border-radius:12px}.metric-value{font:700 21px Manrope;color:var(--ink)}.metric-label{font-size:11px;color:var(--muted);margin-top:3px}.feature{padding:15px 16px;background:white;border:1px solid var(--line);border-radius:12px;height:100%}.feature strong{font-size:13px}.feature p{font-size:12px;color:var(--muted);line-height:1.55;margin:6px 0 0}.stAlert{border-radius:10px}.source-chip{display:inline-block;background:#edf3eb;border:1px solid #d9e4d8;border-radius:20px;padding:4px 9px;margin:2px 4px 4px 0;font-size:11px;color:#35543d}
+/* Document review workspace inspired by the supplied screen recording. */
+:root{--ink:#17182c;--green:#6346e8;--sage:#f0edff;--paper:#f7f7fc;--muted:#77798c;--line:#e8e7f1}
+.stApp{background:linear-gradient(180deg,#f6f5ff 0%,#fafaff 44%,#f7f7fc 100%);color:var(--ink)}
+.brand{color:#5940cf}.brand-mark{background:#6548e9;border-radius:10px}
+.stButton>button{background:#6548e9;border-radius:11px;box-shadow:0 5px 14px #6548e92c}.stButton>button:hover{background:#5037d4}
+.stDownloadButton>button{color:#5940cf;border-color:#dedaf7}.stTabs [aria-selected="true"]{color:#6346e8!important}
+.stApp [data-testid="stHorizontalBlock"]:has([data-testid="stChatInput"]){gap:18px!important;align-items:stretch}
+.stApp [data-testid="stHorizontalBlock"]:has([data-testid="stChatInput"])>[data-testid="column"]{background:#fff;border:1px solid #ebeaf4;border-radius:22px;padding:22px 24px;box-shadow:0 15px 44px #2520480a;min-height:540px}
+.stApp [data-testid="stHorizontalBlock"]:has([data-testid="stChatInput"])>[data-testid="column"]:first-child{background:linear-gradient(180deg,#fff,#fdfcff)}
+.stApp [data-testid="stChatInput"],.stApp [data-testid="stChatInput"]>div,.stApp [data-testid="stChatInput"] textarea{background:#fff!important;color:#191a2c!important;border-color:#dedbed!important;border-radius:12px!important}
+.stApp [data-testid="stChatInput"]:focus-within{border-color:#927ef0!important;box-shadow:0 0 0 3px #8066ee20!important}
+.stApp [data-testid="stChatMessage"]{background:#faf9ff!important;border:1px solid #efedf8!important;border-radius:14px!important;padding:13px 15px!important;color:#202136!important}
+.stApp [data-testid="stChatMessage"] p,.stApp [data-testid="stChatMessage"] li{color:#202136!important;line-height:1.65}
+.stApp [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]){background:#f7f5ff!important;border-color:#ece8ff!important}
+.ai-orb{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(145deg,#7556f3,#9e83ff);color:#fff;font:700 15px Manrope,sans-serif;box-shadow:0 6px 16px #7658ed35;margin-bottom:10px}
+.workspace-kicker{font-size:10px;font-weight:700;letter-spacing:.13em;color:#8b7bd3;text-transform:uppercase;margin:4px 0 7px}
+.workspace-heading{font:700 20px Manrope,sans-serif;color:#1b1c30;letter-spacing:-.03em;margin:0 0 8px}
+.summary-preview{background:#faf9ff;border:1px solid #eeecf7;border-radius:14px;padding:16px 18px;color:#45465a;font-size:13px;line-height:1.75}
+@media(max-width:760px){.stApp [data-testid="stHorizontalBlock"]:has([data-testid="stChatInput"]){flex-direction:column}.stApp [data-testid="stHorizontalBlock"]:has([data-testid="stChatInput"])>[data-testid="column"]{min-height:unset;padding:17px}}
 </style>
 <div class="brand"><span class="brand-mark">P</span> PAGEWISE <span style="font-weight:500;color:#89938b;letter-spacing:.02em">DOCUMENT STUDIO</span></div>
 <section class="hero"><span class="pill">YOUR DOCUMENT WORKSPACE</span><h1>Understand any document,<br><span>one page at a time.</span></h1><p>Turn PDFs, scans, Word files and presentations into clear summaries, study notes and answers grounded in the source.</p></section>
@@ -292,31 +312,42 @@ if st.session_state.get("document_text"):
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     chat_tab, summary_tab, study_tab, text_tab = st.tabs(["⌕ Chat with document", "✦ Summary", "▤ Study tools", "Text & sources"])
     with chat_tab:
-        st.markdown("#### Find specific information in your document")
-        st.caption("Ask about facts, dates, terms, or sections. Pagewise retrieves relevant passages first, then answers with page or slide citations.")
-        if not st.session_state.get("chat_history"):
-            st.markdown("Try asking: **What are the key findings?** · **Find dates and numbers** · **What does the document recommend?**")
-        for message in st.session_state.get("chat_history", []):
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-                if message.get("sources"):
-                    st.caption("Sources: " + " · ".join(sorted({source["source"] for source in message["sources"]})))
-        question = st.chat_input("Ask about a key idea, date, term, or section…")
-        if question:
-            history = st.session_state.chat_history
-            history.append({"role": "user", "content": question})
-            with st.chat_message("user"):
-                st.markdown(question)
-            with st.chat_message("assistant"):
-                with st.spinner("Finding relevant passages…"):
-                    try:
-                        answer, sources = answer_with_rag(question, chunks, history[:-1])
-                        st.markdown(answer)
-                        if sources:
-                            st.caption("Retrieved: " + " · ".join(sorted({source["source"] for source in sources})))
-                        history.append({"role": "assistant", "content": answer, "sources": sources})
-                    except Exception as error:
-                        st.error(str(error))
+        context_col, chat_col = st.columns([1, 1.05], gap="large")
+        with context_col:
+            st.markdown('<div class="workspace-kicker">Document overview</div><div class="workspace-heading">Executive summary</div>', unsafe_allow_html=True)
+            preview = st.session_state.get("ai_summary") or st.session_state.summary
+            st.markdown(f'<div class="summary-preview">{html.escape(preview[:2200])}</div>', unsafe_allow_html=True)
+            st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+            st.markdown('<div class="workspace-kicker">Source material</div><div class="workspace-heading" style="font-size:16px">Extracted content</div>', unsafe_allow_html=True)
+            st.caption(f"{words:,} words ? {pages} pages or slides ? {len(chunks)} searchable passages")
+            with st.expander("Preview document text", expanded=False):
+                st.text(text[:5000] + ("?" if len(text) > 5000 else ""))
+        with chat_col:
+            st.markdown('<div class="ai-orb">AI</div><div class="workspace-kicker">Document assistant</div><div class="workspace-heading">Ask your document</div>', unsafe_allow_html=True)
+            st.caption("Find specific details, explain a section, or ask about dates and key findings. Answers use relevant passages from this file.")
+            if not st.session_state.get("chat_history"):
+                st.markdown("Try: **What are the key findings?** ? **Find the important dates** ? **Explain the conclusion**")
+            for message in st.session_state.get("chat_history", []):
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+                    if message.get("sources"):
+                        st.caption("Sources: " + " ? ".join(sorted({source["source"] for source in message["sources"]})))
+            question = st.chat_input("Ask anything about this document?")
+            if question:
+                history = st.session_state.chat_history
+                history.append({"role": "user", "content": question})
+                with st.chat_message("user"):
+                    st.markdown(question)
+                with st.chat_message("assistant"):
+                    with st.spinner("Finding relevant passages?"):
+                        try:
+                            answer, sources = answer_with_rag(question, chunks, history[:-1])
+                            st.markdown(answer)
+                            if sources:
+                                st.caption("Sources: " + " ? ".join(sorted({source["source"] for source in sources})))
+                            history.append({"role": "assistant", "content": answer, "sources": sources})
+                        except Exception as error:
+                            st.error(str(error))
     with summary_tab:
         a, b = st.columns([1, 1])
         with a:
