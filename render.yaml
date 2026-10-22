@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: pagewise-document-studio
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /_stcore/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
